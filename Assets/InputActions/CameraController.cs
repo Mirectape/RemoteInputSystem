@@ -1,4 +1,6 @@
+using FMSolution.FMNetwork;
 using System;
+using System.Globalization;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -6,8 +8,11 @@ using UnityEngine.InputSystem;
 public class CameraController : MonoBehaviour
 {
     private CameraControlActions _cameraActions;
-    private InputAction _pan;
+    private InputAction _movement;
     private Transform _cameraTransform;
+
+    [SerializeField]
+    private FMNetworkManager _fmManager;
 
     //Horizontal motion
     [SerializeField] 
@@ -16,7 +21,7 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     private float _acceleration = 10f;
     [SerializeField]
-    private float _damping = 15f;
+    private float _damping = 5f;
 
     //Vertical motion - zooming
     [SerializeField]
@@ -34,13 +39,6 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     private float _maxRotationSpeed = 0.5f;
 
-    //Screen edge motion
-    [SerializeField]
-    [Range(0f, 0.1f)]
-    private float _edgeTolerance = 0.05f;
-    [SerializeField]
-    private bool _useScreenEdge = false;
-
     //value set in various functions 
     //used to update the position of the camera base object.
     private Vector3 _targetPosition;
@@ -48,16 +46,18 @@ public class CameraController : MonoBehaviour
     private float _zoomHeight;
 
     //used to track and maintain velocity w/o a rigidbody
-    private Vector3 _horizontalVelocity;
+    private Vector3 _verticalVelocity;
     private Vector3 _lastPosition;
 
     //tracks where the dragging action started
     private Vector3 _startDrag;
+    private Vector3 _planeNormal; 
 
     private void Awake()
     {
         _cameraActions = new CameraControlActions();
         _cameraTransform = this.GetComponentInChildren<Camera>().transform;
+        _planeNormal = Vector3.forward;
     }
 
     private void OnEnable()
@@ -66,7 +66,7 @@ public class CameraController : MonoBehaviour
         _cameraTransform.LookAt(this.transform);
 
         _lastPosition = this.transform.position;
-        _pan = _cameraActions.Camera.Movement;
+        _movement = _cameraActions.Camera.Movement;
         _cameraActions.Camera.Enable();
         _cameraActions.Camera.Rotate.performed += RotateCamera;
         _cameraActions.Camera.Zoom.performed += ZoomCamera;
@@ -81,7 +81,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        GetKeyboardMovement();
+        GetKeyboardPanMovement();
         DragCamera();
 
         UpdateVelocity();
@@ -91,36 +91,20 @@ public class CameraController : MonoBehaviour
 
     private void UpdateVelocity()
     {
-        _horizontalVelocity = (this.transform.position - _lastPosition) / Time.deltaTime;
-        _horizontalVelocity.y = 0;
+        _verticalVelocity = (this.transform.position - _lastPosition) / Time.deltaTime;
         _lastPosition = this.transform.position;
-
     }
 
-    private void GetKeyboardMovement()
+    private void GetKeyboardPanMovement()
     {
-        Vector3 inputValue = _pan.ReadValue<Vector2>().x * GetCameraRight() +
-            _pan.ReadValue<Vector2>().y * GetCameraForward();
+        Vector3 inputValue = _movement.ReadValue<Vector2>().x * GetCameraRight() +
+            _movement.ReadValue<Vector2>().y * GetCameraUp();
         inputValue = inputValue.normalized;
 
-        if(inputValue.sqrMagnitude > 0.1f)
+        if (inputValue.sqrMagnitude > 0.1f)
         {
             _targetPosition += inputValue;
         }
-    }
-
-    private Vector3 GetCameraRight()
-    {
-        Vector3 right = _cameraTransform.right;
-        right.y = 0;
-        return right;
-    }
-
-    private Vector3 GetCameraForward()
-    {
-        Vector3 forward = _cameraTransform.forward;
-        forward.x = 0;
-        return forward;
     }
 
     private void UpdateBasePosition()
@@ -132,8 +116,8 @@ public class CameraController : MonoBehaviour
         }
         else
         {
-            _horizontalVelocity = Vector3.Lerp(_horizontalVelocity, Vector3.zero, Time.deltaTime * _damping);
-            transform.position += _horizontalVelocity * Time.deltaTime;
+            _verticalVelocity = Vector3.Lerp(_verticalVelocity, Vector3.zero, Time.deltaTime * _damping);
+            transform.position += _verticalVelocity * Time.deltaTime;
         }
 
         _targetPosition = Vector3.zero;
@@ -148,12 +132,22 @@ public class CameraController : MonoBehaviour
 
         float value_x = inputValue.ReadValue<Vector2>().x;
         transform.rotation = Quaternion.Euler(0f, value_x * _maxRotationSpeed + transform.rotation.eulerAngles.y, 0f);
+        _planeNormal = transform.rotation * Vector3.forward;
+        RotateCameraSendToClient(value_x);
+    }
+
+    private void RotateCameraSendToClient(float value_x)
+    {
+        var valueString = string.Format(CultureInfo.InvariantCulture, "r_{0}", value_x);
+        
+        
+        _fmManager.SendToOthers(valueString);
     }
 
     private void ZoomCamera(InputAction.CallbackContext inputValue)
     {
-        float valueStrenght = 0.01f;
-        float value = -inputValue.ReadValue<Vector2>().y * valueStrenght;
+        float valueStrength = 0.01f;
+        float value = -inputValue.ReadValue<Vector2>().y * valueStrength;
         if(Math.Abs(value) > 0.1f)
         {
             _zoomHeight = _cameraTransform.localPosition.y + value * _stepSize;
@@ -166,6 +160,13 @@ public class CameraController : MonoBehaviour
                 _zoomHeight = _maxHeight;
             }
         }
+        ZoomCameraSendToClient(value);
+    }
+
+    private void ZoomCameraSendToClient(float value)
+    {
+        var valueString = string.Format(CultureInfo.InvariantCulture, "z_{0}", value);
+        _fmManager.SendToOthers(valueString);
     }
 
     private void UpdateCameraPosition()
@@ -178,41 +179,18 @@ public class CameraController : MonoBehaviour
         _cameraTransform.LookAt(this.transform);
     }
 
-    private void CheckMouseAtScreenEdge()
-    {
-        Vector2 mousePosition = Mouse.current.position.ReadValue();
-        Vector3 moveDirection = Vector3.zero;
-
-        if(mousePosition.x < _edgeTolerance * Screen.width)
-        {
-            moveDirection += -GetCameraRight();
-        }
-        else if (mousePosition.x > (1 - _edgeTolerance) * Screen.width)
-        {
-            moveDirection += GetCameraRight();
-        }
-
-        if (mousePosition.y < _edgeTolerance * Screen.height)
-        {
-            moveDirection += -GetCameraForward();
-        }
-        else if (mousePosition.y > (1 - _edgeTolerance) * Screen.height)
-        {
-            moveDirection += GetCameraForward();
-        }
-
-        _targetPosition += moveDirection;
-    }
-
-    private void DragCamera() //???
+    /// <summary>
+    /// Use this func to pan around
+    /// </summary>
+    private void DragCamera()
     {
         if (!Mouse.current.middleButton.isPressed)
         {
             return;
         }
-
-        Plane plane = new Plane(Vector3.up, Vector3.zero);
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        Vector2 mouseValue = Mouse.current.position.ReadValue();
+        Plane plane = new Plane(_planeNormal, Vector3.zero);
+        Ray ray = Camera.main.ScreenPointToRay(mouseValue);
         
         if(plane.Raycast(ray, out float distance))
         {
@@ -225,5 +203,33 @@ public class CameraController : MonoBehaviour
                 _targetPosition += _startDrag - ray.GetPoint(distance);
             }
         }
+        DragCameraSendToClient(mouseValue);
+    }
+
+    private void DragCameraSendToClient(Vector2 mousePosition)
+    {
+        var mousePositionString = string.Format(CultureInfo.InvariantCulture, "p_{0};{1}", mousePosition.x, mousePosition.y);
+        _fmManager.SendToOthers(mousePositionString);
+    }
+
+    private Vector3 GetCameraRight()
+    {
+        Vector3 right = _cameraTransform.right;
+        right.y = 0f;
+        return right;
+    }
+
+    private Vector3 GetCameraForward()
+    {
+        Vector3 forward = _cameraTransform.forward;
+        forward.y = 0f;
+        return forward;
+    }
+
+    private Vector3 GetCameraUp()
+    {
+        Vector3 up = _cameraTransform.up;
+        up.z = 0f;
+        return up;
     }
 }

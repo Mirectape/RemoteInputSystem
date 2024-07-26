@@ -152,6 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33c73b9af1ef5f5439682bed8ee67b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _fmManager: {fileID: 1943852502}
   _maxSpeed: 5
   _acceleration: 10
   _damping: 15
@@ -161,8 +162,6 @@ MonoBehaviour:
   _maxHeight: 50
   _zoomSpeed: 2
   _maxRotationSpeed: 1
-  _edgeTolerance: 0.05
-  _useScreenEdge: 1
 --- !u!4 &129128807
 Transform:
   m_ObjectHideFlags: 0
@@ -178,6 +177,7 @@ Transform:
   m_Children:
   - {fileID: 963194228}
   - {fileID: 813899496}
+  - {fileID: 1943852503}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &373197600
@@ -549,6 +549,123 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _camera: {fileID: 963194227}
   _target: {fileID: 813899496}
+--- !u!1 &1943852501
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1943852503}
+  - component: {fileID: 1943852502}
+  m_Layer: 0
+  m_Name: FMManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1943852502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1943852501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f68ecff929c04b31832e383f4dfe4fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EditorShowNetworking: 1
+  EditorShowSyncTransformation: 1
+  EditorShowEvents: 1
+  EditorShowDebug: 1
+  EditorShowServerSettings: 0
+  EditorShowClientSettings: 0
+  EditorShowDataStreamSettings: 0
+  EditorShownetworkedObjects: 0
+  EditorShowReceiverEvents: 0
+  EditorShowConnectionEvents: 0
+  AutoInit: 1
+  NetworkType: 0
+  Server: {fileID: 0}
+  Client: {fileID: 0}
+  DataStream: {fileID: 0}
+  ServerSettings:
+    ServerListenPort: 3333
+    UDPListenerType: 1
+    UseMainThreadSender: 1
+    SupportMulticast: 0
+    MulticastAddress: 239.255.255.255
+    ConnectionCount: 0
+  ClientSettings:
+    ClientListenPort: 3334
+    UDPListenerType: 1
+    UseMainThreadSender: 1
+    ForceBroadcast: 0
+    SupportMulticast: 0
+    MulticastAddress: 239.255.255.255
+    AutoNetworkDiscovery: 1
+    ServerIP: 
+    IsConnected: 0
+  DataStreamSettings:
+    DataStreamType: 0
+    DataStreamProtocol: 0
+    ClientListenPort: 3001
+    UDPTransferType: 0
+    UDPListenerType: 0
+    TCPSocketType: 0
+    MulticastAddress: 239.255.255.255
+    IsConnected: 0
+    ServerIP: 127.0.0.1
+    ClientIP: 127.0.0.1
+    ClientIPList: []
+    UseMainThreadSender: 1
+  DebugStatus: 1
+  ShowLog: 1
+  Status: 
+  UIStatus: {fileID: 0}
+  OnReceivedByteDataEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnReceivedStringDataEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  GetRawReceivedData:
+    m_PersistentCalls:
+      m_Calls: []
+  OnClientConnectedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnClientDisconnectedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnConnectionCountChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnFoundServerEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnLostServerEvent:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &1943852503
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1943852501}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 129128807}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2045226982
 GameObject:
   m_ObjectHideFlags: 0

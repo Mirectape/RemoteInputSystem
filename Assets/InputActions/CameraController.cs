@@ -35,7 +35,7 @@ public class CameraController : MonoBehaviour
 
     //Rotation
     [SerializeField]
-    private float _maxRotationSpeed = 0.5f;
+    private float _maxRotationSpeed = 0.3f;
 
     //value set in various functions 
     //used to update the position of the camera base object.
@@ -129,7 +129,10 @@ public class CameraController : MonoBehaviour
         }
 
         float value_x = inputValue.ReadValue<Vector2>().x;
-        transform.rotation = Quaternion.Euler(0f, value_x * _maxRotationSpeed + transform.rotation.eulerAngles.y, 0f);
+        float value_y = inputValue.ReadValue < Vector2>().y;
+        transform.rotation = Quaternion.Euler(value_y * _maxRotationSpeed + transform.rotation.eulerAngles.x, 
+                                                value_x * _maxRotationSpeed + transform.rotation.eulerAngles.y, 
+                                                0f);
         _planeNormal = transform.rotation * Vector3.forward;
         RotateCameraSendToClient(value_x);
     }

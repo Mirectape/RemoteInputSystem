@@ -25,15 +25,13 @@ public class CameraController : MonoBehaviour
 
     //Vertical motion - zooming
     [SerializeField]
-    private float _stepSize = 2f;
+    private float _stepSize = 0.3f;
     [SerializeField]
     private float _zoomDampening = 7.5f;
     [SerializeField]
-    private float _minHeight = 0.5f;
+    private float _minDistance = 0.5f;
     [SerializeField]
-    private float _maxHeight = 50f;
-    [SerializeField]
-    private float _zoomSpeed = 2f;
+    private float _maxDistance = 50f;
 
     //Rotation
     [SerializeField]
@@ -43,7 +41,7 @@ public class CameraController : MonoBehaviour
     //used to update the position of the camera base object.
     private Vector3 _targetPosition;
 
-    private float _zoomHeight;
+    private float _zoomDistance;
 
     //used to track and maintain velocity w/o a rigidbody
     private Vector3 _verticalVelocity;
@@ -62,7 +60,7 @@ public class CameraController : MonoBehaviour
 
     private void OnEnable()
     {
-        _zoomHeight = _cameraTransform.localPosition.y;
+        _zoomDistance = _cameraTransform.localPosition.z;
         _cameraTransform.LookAt(this.transform);
 
         _lastPosition = this.transform.position;
@@ -150,14 +148,15 @@ public class CameraController : MonoBehaviour
         float value = -inputValue.ReadValue<Vector2>().y * valueStrength;
         if(Math.Abs(value) > 0.1f)
         {
-            _zoomHeight = _cameraTransform.localPosition.y + value * _stepSize;
-            if(_zoomHeight < _minHeight)
+            _zoomDistance += value * _stepSize;
+            Debug.Log(_cameraTransform.localPosition.z);
+            if(_zoomDistance < _minDistance)
             {
-                _zoomHeight = _minHeight;
+                _zoomDistance = _minDistance;
             }
-            else if(_zoomHeight > _maxHeight)
+            else if(_zoomDistance > _maxDistance)
             {
-                _zoomHeight = _maxHeight;
+                _zoomDistance = _maxDistance;
             }
         }
         ZoomCameraSendToClient(value);
@@ -171,10 +170,9 @@ public class CameraController : MonoBehaviour
 
     private void UpdateCameraPosition()
     {
-        Vector3 zoomTarget = new Vector3(_cameraTransform.localPosition.x, 
-            _zoomHeight, 
-            _cameraTransform.localPosition.z);
-        zoomTarget -= _zoomSpeed * (_zoomHeight - _cameraTransform.localPosition.y) * Vector3.forward;
+        Vector3 zoomTarget = new Vector3(_cameraTransform.localPosition.x,
+                                        _cameraTransform.localPosition.y,
+                                        _zoomDistance);
         _cameraTransform.localPosition = Vector3.Lerp(_cameraTransform.localPosition, zoomTarget, Time.deltaTime * _zoomDampening);
         _cameraTransform.LookAt(this.transform);
     }

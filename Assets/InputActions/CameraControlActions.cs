@@ -31,7 +31,7 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
                     ""name"": ""Movement"",
                     ""type"": ""Value"",
                     ""id"": ""e5805398-15a7-41c9-9a23-124f6996ca69"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -40,7 +40,7 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
                     ""name"": ""Rotate"",
                     ""type"": ""Value"",
                     ""id"": ""acb1b569-c0b5-4719-8f89-99b7acffc2c3"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -57,7 +57,7 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
             ],
             ""bindings"": [
                 {
-                    ""name"": ""2D Vector"",
+                    ""name"": ""WASD"",
                     ""id"": ""0a93c6a6-ddf9-4b95-8d56-7fe9b4dee133"",
                     ""path"": ""2DVector"",
                     ""interactions"": """",
@@ -113,8 +113,8 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""cca04a47-dc56-44b4-89db-c2672dfc0dde"",
-                    ""path"": ""<Touchscreen>/delta"",
+                    ""id"": ""6730d643-62c6-45ad-a911-3a138d14e8e3"",
+                    ""path"": ""<Gamepad>/leftStick"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -126,6 +126,17 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""d8567fd8-2fc4-466c-8c81-41e6eb13c61d"",
                     ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Rotate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5e96d018-ce57-4043-baf8-8996e78b9b18"",
+                    ""path"": ""<Gamepad>/rightStick"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

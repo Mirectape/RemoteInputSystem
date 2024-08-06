@@ -79,7 +79,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        GetKeyboardPanMovement();
+        UpdatePanMovement();
         DragCamera();
 
         UpdateVelocity();
@@ -93,7 +93,7 @@ public class CameraController : MonoBehaviour
         _lastPosition = this.transform.position;
     }
 
-    private void GetKeyboardPanMovement()
+    private void UpdatePanMovement()
     {
         Vector3 inputValue = _movement.ReadValue<Vector2>().x * GetCameraRight() +
             _movement.ReadValue<Vector2>().y * GetCameraUp();
@@ -123,7 +123,7 @@ public class CameraController : MonoBehaviour
 
     private void RotateCamera(InputAction.CallbackContext inputValue)
     {
-        if(!Mouse.current.leftButton.isPressed)
+        if(!Mouse.current.rightButton.isPressed)
         {
             return;
         }

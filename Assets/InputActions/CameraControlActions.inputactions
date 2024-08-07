@@ -18,7 +18,7 @@
                     "name": "Rotate",
                     "type": "Value",
                     "id": "acb1b569-c0b5-4719-8f89-99b7acffc2c3",
-                    "expectedControlType": "Vector2",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -102,17 +102,6 @@
                 },
                 {
                     "name": "",
-                    "id": "d8567fd8-2fc4-466c-8c81-41e6eb13c61d",
-                    "path": "<Mouse>/delta",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Rotate",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "5e96d018-ce57-4043-baf8-8996e78b9b18",
                     "path": "<Gamepad>/rightStick",
                     "interactions": "",
@@ -121,6 +110,39 @@
                     "action": "Rotate",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "MouseRightButton",
+                    "id": "9c7add53-7bef-4751-bf77-62eb3aded4b1",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "00da6650-df86-4ea7-8d63-74b004b6fc8a",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "d9099c30-8f9e-429d-811f-11f8caad4f49",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 },
                 {
                     "name": "",

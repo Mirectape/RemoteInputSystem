@@ -123,15 +123,10 @@ public class CameraController : MonoBehaviour
 
     private void RotateCamera(InputAction.CallbackContext inputValue)
     {
-        if(!Mouse.current.rightButton.isPressed)
-        {
-            return;
-        }
-
         float value_x = inputValue.ReadValue<Vector2>().x;
-        float value_y = inputValue.ReadValue < Vector2>().y;
-        transform.rotation = Quaternion.Euler(value_y * _maxRotationSpeed + transform.rotation.eulerAngles.x, 
-                                                value_x * _maxRotationSpeed + transform.rotation.eulerAngles.y, 
+        float value_y = inputValue.ReadValue<Vector2>().y;
+        transform.rotation = Quaternion.Euler(value_y * _maxRotationSpeed + transform.rotation.eulerAngles.x,
+                                                value_x * _maxRotationSpeed + transform.rotation.eulerAngles.y,
                                                 0f);
         _planeNormal = transform.rotation * Vector3.forward;
         RotateCameraSendToClient(value_x);
@@ -181,7 +176,7 @@ public class CameraController : MonoBehaviour
     }
 
     /// <summary>
-    /// Use this func to pan around
+    /// Use this func to pan around with Mouse
     /// </summary>
     private void DragCamera()
     {

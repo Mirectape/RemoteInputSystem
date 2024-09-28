@@ -1,231 +1,110 @@
 using FMSolution.FMNetwork;
 using System;
-using System.Globalization;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
+    //maps for inner control
     private CameraControlActions _cameraActions;
     private InputAction _movement;
-    private Transform _cameraTransform;
+    private InputAction _rotation;
+    private InputAction _zoom;
+    private InputAction _drag;
 
-    [SerializeField]
-    private FMNetworkManager _fmManager;
-
-    //Horizontal motion
-    [SerializeField] 
-    private float _maxSpeed = 5f;
-    private float _speed;
-    [SerializeField]
-    private float _acceleration = 10f;
-    [SerializeField]
-    private float _damping = 5f;
-
-    //Vertical motion - zooming
-    [SerializeField]
-    private float _stepSize = 0.3f;
-    [SerializeField]
-    private float _zoomDampening = 7.5f;
-    [SerializeField]
-    private float _minDistance = 0.5f;
-    [SerializeField]
-    private float _maxDistance = 50f;
-
-    //Rotation
-    [SerializeField]
-    private float _maxRotationSpeed = 0.3f;
-
-    //value set in various functions 
-    //used to update the position of the camera base object.
-    private Vector3 _targetPosition;
-
-    private float _zoomDistance;
-
-    //used to track and maintain velocity w/o a rigidbody
-    private Vector3 _verticalVelocity;
-    private Vector3 _lastPosition;
-
-    //tracks where the dragging action started
-    private Vector3 _startDrag;
-    private Vector3 _planeNormal; 
+    //for signals from outside control
+    [SerializeField] private FMNetworkManager _fmManager;
 
     private void Awake()
     {
         _cameraActions = new CameraControlActions();
-        _cameraTransform = this.GetComponentInChildren<Camera>().transform;
-        _planeNormal = Vector3.forward;
     }
 
     private void OnEnable()
     {
-        _zoomDistance = _cameraTransform.localPosition.z;
-        _cameraTransform.LookAt(this.transform);
-
-        _lastPosition = this.transform.position;
         _movement = _cameraActions.Camera.Movement;
+        _rotation = _cameraActions.Camera.Rotate;
+        _zoom = _cameraActions.Camera.Zoom;
+        _drag = _cameraActions.Camera.Drag;
         _cameraActions.Camera.Enable();
-        _cameraActions.Camera.Rotate.performed += RotateCamera;
-        _cameraActions.Camera.Zoom.performed += ZoomCamera;
     }
 
     private void OnDisable()
     {
-        _cameraActions.Camera.Rotate.performed -= RotateCamera;
-        _cameraActions.Camera.Zoom.performed -= ZoomCamera;
         _cameraActions.Disable();
     }
 
     private void Update()
     {
-        UpdatePanMovement();
-        DragCamera();
-
-        UpdateVelocity();
-        UpdateCameraPosition();
-        UpdateBasePosition();
+        CameraBrain.Instance.PanCamera(_movement.ReadValue<Vector2>());
+        CameraBrain.Instance.DragCamera(_drag);
+        CameraBrain.Instance.RotateCamera(_rotation.ReadValue<Vector2>());
+        CameraBrain.Instance.ZoomCamera(_zoom.ReadValue<Vector2>());
+        CameraBrain.Instance.UseMovetracking();
+        ActionEncoderTransformation();
     }
 
-    private void UpdateVelocity()
+    public void ActionEncoderTransformation()
     {
-        _verticalVelocity = (this.transform.position - _lastPosition) / Time.deltaTime;
-        _lastPosition = this.transform.position;
-    }
-
-    private void UpdatePanMovement()
-    {
-        Vector3 inputValue = _movement.ReadValue<Vector2>().x * GetCameraRight() +
-            _movement.ReadValue<Vector2>().y * GetCameraUp();
-        inputValue = inputValue.normalized;
-
-        if (inputValue.sqrMagnitude > 0.1f)
-        {
-            _targetPosition += inputValue;
-        }
-    }
-
-    private void UpdateBasePosition()
-    {
-        if (_targetPosition.sqrMagnitude > 0.1f)
-        {
-            _speed = Mathf.Lerp(_speed, _maxSpeed, Time.deltaTime * _acceleration);
-            transform.position += _targetPosition * _speed * Time.deltaTime;
-        }
-        else
-        {
-            _verticalVelocity = Vector3.Lerp(_verticalVelocity, Vector3.zero, Time.deltaTime * _damping);
-            transform.position += _verticalVelocity * Time.deltaTime;
-        }
-
-        _targetPosition = Vector3.zero;
-    }
-
-    private void RotateCamera(InputAction.CallbackContext inputValue)
-    {
-        float value_x = inputValue.ReadValue<Vector2>().x;
-        float value_y = inputValue.ReadValue<Vector2>().y;
-        transform.rotation = Quaternion.Euler(value_y * _maxRotationSpeed + transform.rotation.eulerAngles.x,
-                                                value_x * _maxRotationSpeed + transform.rotation.eulerAngles.y,
-                                                0f);
-        _planeNormal = transform.rotation * Vector3.forward;
-        RotateCameraSendToClient(value_x);
-    }
-
-    private void RotateCameraSendToClient(float value_x)
-    {
-        var valueString = string.Format(CultureInfo.InvariantCulture, "r_{0}", value_x);
-        
-        
-        _fmManager.SendToOthers(valueString);
-    }
-
-    private void ZoomCamera(InputAction.CallbackContext inputValue)
-    {
-        float valueStrength = 0.01f;
-        float value = -inputValue.ReadValue<Vector2>().y * valueStrength;
-        if(Math.Abs(value) > 0.1f)
-        {
-            _zoomDistance += value * _stepSize;
-            Debug.Log(_cameraTransform.localPosition.z);
-            if(_zoomDistance < _minDistance)
-            {
-                _zoomDistance = _minDistance;
-            }
-            else if(_zoomDistance > _maxDistance)
-            {
-                _zoomDistance = _maxDistance;
-            }
-        }
-        ZoomCameraSendToClient(value);
-    }
-
-    private void ZoomCameraSendToClient(float value)
-    {
-        var valueString = string.Format(CultureInfo.InvariantCulture, "z_{0}", value);
-        _fmManager.SendToOthers(valueString);
-    }
-
-    private void UpdateCameraPosition()
-    {
-        Vector3 zoomTarget = new Vector3(_cameraTransform.localPosition.x,
-                                        _cameraTransform.localPosition.y,
-                                        _zoomDistance);
-        _cameraTransform.localPosition = Vector3.Lerp(_cameraTransform.localPosition, zoomTarget, Time.deltaTime * _zoomDampening);
-        _cameraTransform.LookAt(this.transform);
-    }
-
-    /// <summary>
-    /// Use this func to pan around with Mouse
-    /// </summary>
-    private void DragCamera()
-    {
-        if (!Mouse.current.middleButton.isPressed)
+        if (_fmManager.NetworkType == FMNetworkType.Client)
         {
             return;
         }
-        Vector2 mouseValue = Mouse.current.position.ReadValue();
-        Plane plane = new Plane(_planeNormal, Vector3.zero);
-        Ray ray = Camera.main.ScreenPointToRay(mouseValue);
-        
-        if(plane.Raycast(ray, out float distance))
+
+        //convert _movementVector2.x, .y, _rotationVector2.x, .y, _zoomVector2.x, .y [total: 6] into byte[]
+        int amountOfFloatsFromSignal = 6;
+        int floatWeightInBytes = 4;
+
+        byte[] sendBytes = new byte[amountOfFloatsFromSignal * floatWeightInBytes];
+        int offset = 0;
+
+        byte[] byte_movement_x = BitConverter.GetBytes(_movement.ReadValue<Vector2>().x);
+        byte[] byte_movement_y = BitConverter.GetBytes(_movement.ReadValue<Vector2>().y);
+        byte[] byte_rotation_x = BitConverter.GetBytes(_rotation.ReadValue<Vector2>().x);
+        byte[] byte_rotation_y = BitConverter.GetBytes(_rotation.ReadValue<Vector2>().y);
+        byte[] byte_zoom_x = BitConverter.GetBytes(_zoom.ReadValue<Vector2>().x);
+        byte[] byte_zoom_y = BitConverter.GetBytes(_zoom.ReadValue<Vector2>().y);
+
+        //copy each byte[] to SendBytes
+        Buffer.BlockCopy(byte_movement_x, 0, sendBytes, offset, 4); offset += 4;
+        Buffer.BlockCopy(byte_movement_y, 0, sendBytes, offset, 4); offset += 4;
+        Buffer.BlockCopy(byte_rotation_x, 0, sendBytes, offset, 4); offset += 4;
+        Buffer.BlockCopy(byte_rotation_y, 0, sendBytes, offset, 4); offset += 4;
+        Buffer.BlockCopy(byte_zoom_x, 0, sendBytes, offset, 4); offset += 4;
+        Buffer.BlockCopy(byte_zoom_y, 0, sendBytes, offset, 4); offset += 4;
+
+        //send the bytes[]
+        if (_fmManager.NetworkType == FMNetworkType.Server)
         {
-            if(Mouse.current.middleButton.wasPressedThisFrame)
-            {
-                _startDrag = ray.GetPoint(distance);
-            }
-            else
-            {
-                _targetPosition += _startDrag - ray.GetPoint(distance);
-            }
+            _fmManager.SendToOthers(sendBytes);
         }
-        DragCameraSendToClient(mouseValue);
+
     }
 
-    private void DragCameraSendToClient(Vector2 mousePosition)
+    public void ActionDecodeTransformation(byte[] receivedBytes)
     {
-        var mousePositionString = string.Format(CultureInfo.InvariantCulture, "p_{0};{1}", mousePosition.x, mousePosition.y);
-        _fmManager.SendToOthers(mousePositionString);
-    }
+        // make sure id doesn't override server pos
+        if (_fmManager.NetworkType == FMNetworkType.Server)
+        {
+            return;
+        }
 
-    private Vector3 GetCameraRight()
-    {
-        Vector3 right = _cameraTransform.right;
-        right.y = 0f;
-        return right;
-    }
+        //decode received data for each object
+        int offset = 0;
 
-    private Vector3 GetCameraForward()
-    {
-        Vector3 forward = _cameraTransform.forward;
-        forward.y = 0f;
-        return forward;
-    }
+        float movement_x = BitConverter.ToSingle(receivedBytes, offset); offset += 4;
+        float movement_y = BitConverter.ToSingle(receivedBytes, offset); offset += 4;
+        float rotation_x = BitConverter.ToSingle(receivedBytes, offset); offset += 4;
+        float rotation_y = BitConverter.ToSingle(receivedBytes, offset); offset += 4;
+        float zoom_x = BitConverter.ToSingle(receivedBytes, offset); offset += 4;
+        float zoom_y = BitConverter.ToSingle(receivedBytes, offset); offset += 4;
 
-    private Vector3 GetCameraUp()
-    {
-        Vector3 up = _cameraTransform.up;
-        up.z = 0f;
-        return up;
+        Vector2 movement = new Vector2(movement_x, movement_y);
+        Vector2 rotation = new Vector2(rotation_x, rotation_y);
+        Vector2 zoom = new Vector2(zoom_x, zoom_y);
+
+        CameraBrain.Instance.PanCamera(movement);
+        CameraBrain.Instance.RotateCamera(rotation);
+        CameraBrain.Instance.ZoomCamera(zoom);
     }
 }

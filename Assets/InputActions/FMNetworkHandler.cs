@@ -12,9 +12,9 @@ public class FMNetworkHandler : MonoBehaviour
 
     [SerializeField] private FMNetworkManager _fmManager;
 
-    private void Update()
+    private void FixedUpdate()
     {
-        //try to send/sync in each update 
+        //try to send/sync in each fixed update 
         ActionEncoderTransformation();
     }
 
@@ -62,7 +62,7 @@ public class FMNetworkHandler : MonoBehaviour
 
     public void ActionDecodeTransformation(byte[] receivedBytes)
     {
-        // make sure id doesn't override server pos
+        // make sure it doesn't override server pos
         if (_fmManager.NetworkType == FMNetworkType.Server)
         {
             return;

@@ -24,7 +24,7 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
     ""name"": ""CameraControlActions"",
     ""maps"": [
         {
-            ""name"": ""Camera"",
+            ""name"": ""Input Device"",
             ""id"": ""ea3bb453-ebf1-4c65-b1f1-720fd0d90c26"",
             ""actions"": [
                 {
@@ -220,16 +220,89 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 }
             ]
+        },
+        {
+            ""name"": ""Touch Screen"",
+            ""id"": ""131c4724-8d99-4efa-9772-3db20e8fdab2"",
+            ""actions"": [
+                {
+                    ""name"": ""PrimaryFingerPosition"",
+                    ""type"": ""Value"",
+                    ""id"": ""60b90268-ad7e-4d2a-994a-d1f28194a1b4"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""SecondaryFingerPosition"",
+                    ""type"": ""Value"",
+                    ""id"": ""eef19dea-c540-4245-9509-36e5abc2cdbf"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""SecondaryTouchContact"",
+                    ""type"": ""Button"",
+                    ""id"": ""efe51f89-0f22-4993-b3e2-99ee41bab430"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press"",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""88bb3308-378a-43e1-a751-313bc967670b"",
+                    ""path"": ""<Touchscreen>/touch0/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PrimaryFingerPosition"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""db28f5b5-de1e-49cb-8709-2dd45158627d"",
+                    ""path"": ""<Touchscreen>/touch1/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SecondaryFingerPosition"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""36999c32-704c-4b66-9fdf-f9b5236759ab"",
+                    ""path"": ""<Touchscreen>/touch1/press"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SecondaryTouchContact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
 }");
-        // Camera
-        m_Camera = asset.FindActionMap("Camera", throwIfNotFound: true);
-        m_Camera_Movement = m_Camera.FindAction("Movement", throwIfNotFound: true);
-        m_Camera_Rotate = m_Camera.FindAction("Rotate", throwIfNotFound: true);
-        m_Camera_Zoom = m_Camera.FindAction("Zoom", throwIfNotFound: true);
-        m_Camera_Drag = m_Camera.FindAction("Drag", throwIfNotFound: true);
+        // Input Device
+        m_InputDevice = asset.FindActionMap("Input Device", throwIfNotFound: true);
+        m_InputDevice_Movement = m_InputDevice.FindAction("Movement", throwIfNotFound: true);
+        m_InputDevice_Rotate = m_InputDevice.FindAction("Rotate", throwIfNotFound: true);
+        m_InputDevice_Zoom = m_InputDevice.FindAction("Zoom", throwIfNotFound: true);
+        m_InputDevice_Drag = m_InputDevice.FindAction("Drag", throwIfNotFound: true);
+        // Touch Screen
+        m_TouchScreen = asset.FindActionMap("Touch Screen", throwIfNotFound: true);
+        m_TouchScreen_PrimaryFingerPosition = m_TouchScreen.FindAction("PrimaryFingerPosition", throwIfNotFound: true);
+        m_TouchScreen_SecondaryFingerPosition = m_TouchScreen.FindAction("SecondaryFingerPosition", throwIfNotFound: true);
+        m_TouchScreen_SecondaryTouchContact = m_TouchScreen.FindAction("SecondaryTouchContact", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -288,30 +361,30 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // Camera
-    private readonly InputActionMap m_Camera;
-    private List<ICameraActions> m_CameraActionsCallbackInterfaces = new List<ICameraActions>();
-    private readonly InputAction m_Camera_Movement;
-    private readonly InputAction m_Camera_Rotate;
-    private readonly InputAction m_Camera_Zoom;
-    private readonly InputAction m_Camera_Drag;
-    public struct CameraActions
+    // Input Device
+    private readonly InputActionMap m_InputDevice;
+    private List<IInputDeviceActions> m_InputDeviceActionsCallbackInterfaces = new List<IInputDeviceActions>();
+    private readonly InputAction m_InputDevice_Movement;
+    private readonly InputAction m_InputDevice_Rotate;
+    private readonly InputAction m_InputDevice_Zoom;
+    private readonly InputAction m_InputDevice_Drag;
+    public struct InputDeviceActions
     {
         private @CameraControlActions m_Wrapper;
-        public CameraActions(@CameraControlActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Movement => m_Wrapper.m_Camera_Movement;
-        public InputAction @Rotate => m_Wrapper.m_Camera_Rotate;
-        public InputAction @Zoom => m_Wrapper.m_Camera_Zoom;
-        public InputAction @Drag => m_Wrapper.m_Camera_Drag;
-        public InputActionMap Get() { return m_Wrapper.m_Camera; }
+        public InputDeviceActions(@CameraControlActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Movement => m_Wrapper.m_InputDevice_Movement;
+        public InputAction @Rotate => m_Wrapper.m_InputDevice_Rotate;
+        public InputAction @Zoom => m_Wrapper.m_InputDevice_Zoom;
+        public InputAction @Drag => m_Wrapper.m_InputDevice_Drag;
+        public InputActionMap Get() { return m_Wrapper.m_InputDevice; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(CameraActions set) { return set.Get(); }
-        public void AddCallbacks(ICameraActions instance)
+        public static implicit operator InputActionMap(InputDeviceActions set) { return set.Get(); }
+        public void AddCallbacks(IInputDeviceActions instance)
         {
-            if (instance == null || m_Wrapper.m_CameraActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_CameraActionsCallbackInterfaces.Add(instance);
+            if (instance == null || m_Wrapper.m_InputDeviceActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_InputDeviceActionsCallbackInterfaces.Add(instance);
             @Movement.started += instance.OnMovement;
             @Movement.performed += instance.OnMovement;
             @Movement.canceled += instance.OnMovement;
@@ -326,7 +399,7 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
             @Drag.canceled += instance.OnDrag;
         }
 
-        private void UnregisterCallbacks(ICameraActions instance)
+        private void UnregisterCallbacks(IInputDeviceActions instance)
         {
             @Movement.started -= instance.OnMovement;
             @Movement.performed -= instance.OnMovement;
@@ -342,26 +415,94 @@ public partial class @CameraControlActions: IInputActionCollection2, IDisposable
             @Drag.canceled -= instance.OnDrag;
         }
 
-        public void RemoveCallbacks(ICameraActions instance)
+        public void RemoveCallbacks(IInputDeviceActions instance)
         {
-            if (m_Wrapper.m_CameraActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_InputDeviceActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
-        public void SetCallbacks(ICameraActions instance)
+        public void SetCallbacks(IInputDeviceActions instance)
         {
-            foreach (var item in m_Wrapper.m_CameraActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_InputDeviceActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_CameraActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_InputDeviceActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
-    public CameraActions @Camera => new CameraActions(this);
-    public interface ICameraActions
+    public InputDeviceActions @InputDevice => new InputDeviceActions(this);
+
+    // Touch Screen
+    private readonly InputActionMap m_TouchScreen;
+    private List<ITouchScreenActions> m_TouchScreenActionsCallbackInterfaces = new List<ITouchScreenActions>();
+    private readonly InputAction m_TouchScreen_PrimaryFingerPosition;
+    private readonly InputAction m_TouchScreen_SecondaryFingerPosition;
+    private readonly InputAction m_TouchScreen_SecondaryTouchContact;
+    public struct TouchScreenActions
+    {
+        private @CameraControlActions m_Wrapper;
+        public TouchScreenActions(@CameraControlActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @PrimaryFingerPosition => m_Wrapper.m_TouchScreen_PrimaryFingerPosition;
+        public InputAction @SecondaryFingerPosition => m_Wrapper.m_TouchScreen_SecondaryFingerPosition;
+        public InputAction @SecondaryTouchContact => m_Wrapper.m_TouchScreen_SecondaryTouchContact;
+        public InputActionMap Get() { return m_Wrapper.m_TouchScreen; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(TouchScreenActions set) { return set.Get(); }
+        public void AddCallbacks(ITouchScreenActions instance)
+        {
+            if (instance == null || m_Wrapper.m_TouchScreenActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_TouchScreenActionsCallbackInterfaces.Add(instance);
+            @PrimaryFingerPosition.started += instance.OnPrimaryFingerPosition;
+            @PrimaryFingerPosition.performed += instance.OnPrimaryFingerPosition;
+            @PrimaryFingerPosition.canceled += instance.OnPrimaryFingerPosition;
+            @SecondaryFingerPosition.started += instance.OnSecondaryFingerPosition;
+            @SecondaryFingerPosition.performed += instance.OnSecondaryFingerPosition;
+            @SecondaryFingerPosition.canceled += instance.OnSecondaryFingerPosition;
+            @SecondaryTouchContact.started += instance.OnSecondaryTouchContact;
+            @SecondaryTouchContact.performed += instance.OnSecondaryTouchContact;
+            @SecondaryTouchContact.canceled += instance.OnSecondaryTouchContact;
+        }
+
+        private void UnregisterCallbacks(ITouchScreenActions instance)
+        {
+            @PrimaryFingerPosition.started -= instance.OnPrimaryFingerPosition;
+            @PrimaryFingerPosition.performed -= instance.OnPrimaryFingerPosition;
+            @PrimaryFingerPosition.canceled -= instance.OnPrimaryFingerPosition;
+            @SecondaryFingerPosition.started -= instance.OnSecondaryFingerPosition;
+            @SecondaryFingerPosition.performed -= instance.OnSecondaryFingerPosition;
+            @SecondaryFingerPosition.canceled -= instance.OnSecondaryFingerPosition;
+            @SecondaryTouchContact.started -= instance.OnSecondaryTouchContact;
+            @SecondaryTouchContact.performed -= instance.OnSecondaryTouchContact;
+            @SecondaryTouchContact.canceled -= instance.OnSecondaryTouchContact;
+        }
+
+        public void RemoveCallbacks(ITouchScreenActions instance)
+        {
+            if (m_Wrapper.m_TouchScreenActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(ITouchScreenActions instance)
+        {
+            foreach (var item in m_Wrapper.m_TouchScreenActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_TouchScreenActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public TouchScreenActions @TouchScreen => new TouchScreenActions(this);
+    public interface IInputDeviceActions
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnRotate(InputAction.CallbackContext context);
         void OnZoom(InputAction.CallbackContext context);
         void OnDrag(InputAction.CallbackContext context);
+    }
+    public interface ITouchScreenActions
+    {
+        void OnPrimaryFingerPosition(InputAction.CallbackContext context);
+        void OnSecondaryFingerPosition(InputAction.CallbackContext context);
+        void OnSecondaryTouchContact(InputAction.CallbackContext context);
     }
 }

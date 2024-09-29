@@ -10,7 +10,7 @@ public class CameraBrain : MonoBehaviour
     public Camera camera;
     private Transform _cameraTransform;
 
-    //Horizontal motion
+    // Horizontal motion
     [SerializeField]
     private float _maxSpeed = 5f;
     private float _speed;
@@ -19,7 +19,7 @@ public class CameraBrain : MonoBehaviour
     [SerializeField]
     private float _damping = 5f;
 
-    //Vertical motion - zooming
+    // Vertical motion - zooming
     [SerializeField]
     private float _stepSize = 0.3f;
     [SerializeField]
@@ -29,21 +29,21 @@ public class CameraBrain : MonoBehaviour
     [SerializeField]
     private float _maxDistance = 50f;
 
-    //Rotation
+    // Rotation
     [SerializeField]
     private float _maxRotationSpeed = 0.3f;
 
-    //value set in various functions 
-    //used to update the position of the camera base object.
+    // value set in various functions 
+    // used to update the position of the camera base object.
     private Vector3 _targetPosition;
 
     private float _zoomDistance;
 
-    //used to track and maintain velocity w/o a rigidbody
+    // used to track and maintain velocity w/o a rigidbody
     private Vector3 _verticalVelocity;
     private Vector3 _lastPosition;
 
-    //tracks where the dragging action started
+    // tracks where the dragging action started
     private Vector3 _startDrag;
     private Vector3 _planeNormal;
 

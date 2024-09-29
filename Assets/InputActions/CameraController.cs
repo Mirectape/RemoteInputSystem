@@ -5,33 +5,33 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
-    //maps for inner control
-    private CameraControlActions _cameraActions;
+    // maps for inner control
+    private CameraControlActions _controlMaps;
     private InputAction _movement;
     private InputAction _rotation;
     private InputAction _zoom;
     private InputAction _drag;
 
-    //for signals from outside control
+    // for signals from outside control
     [SerializeField] private FMNetworkManager _fmManager;
 
     private void Awake()
     {
-        _cameraActions = new CameraControlActions();
+        _controlMaps = new CameraControlActions();
     }
 
     private void OnEnable()
     {
-        _movement = _cameraActions.Camera.Movement;
-        _rotation = _cameraActions.Camera.Rotate;
-        _zoom = _cameraActions.Camera.Zoom;
-        _drag = _cameraActions.Camera.Drag;
-        _cameraActions.Camera.Enable();
+        _movement = _controlMaps.InputDevice.Movement;
+        _rotation = _controlMaps.InputDevice.Rotate;
+        _zoom = _controlMaps.InputDevice.Zoom;
+        _drag = _controlMaps.InputDevice.Drag;
+        _controlMaps.InputDevice.Enable();
     }
 
     private void OnDisable()
     {
-        _cameraActions.Disable();
+        _controlMaps.Disable();
     }
 
     private void FixedUpdate()
@@ -51,7 +51,7 @@ public class CameraController : MonoBehaviour
             return;
         }
 
-        //convert _movementVector2.x, .y, _rotationVector2.x, .y, _zoomVector2.x, .y [total: 6] into byte[]
+        // convert _movementVector2.x, .y, _rotationVector2.x, .y, _zoomVector2.x, .y [total: 6] into byte[]
         int amountOfFloatsFromSignal = 6;
         int floatWeightInBytes = 4;
 
@@ -73,7 +73,7 @@ public class CameraController : MonoBehaviour
         Buffer.BlockCopy(byte_zoom_x, 0, sendBytes, offset, 4); offset += 4;
         Buffer.BlockCopy(byte_zoom_y, 0, sendBytes, offset, 4); offset += 4;
 
-        //send the bytes[]
+        // send the bytes[]
         if (_fmManager.NetworkType == FMNetworkType.Server)
         {
             _fmManager.SendToOthers(sendBytes);
@@ -88,7 +88,7 @@ public class CameraController : MonoBehaviour
             return;
         }
 
-        //decode received data for each object
+        // decode received data for each object
         int offset = 0;
 
         float movement_x = BitConverter.ToSingle(receivedBytes, offset); offset += 4;
